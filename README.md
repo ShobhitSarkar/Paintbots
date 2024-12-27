@@ -1,107 +1,118 @@
-# coms3270P2
+# Paintbots: A Strategic Robot Combat Game
 
 ## Overview
 
- Players create and deploy robot agents with unique strategies to outmaneuver their opponent, painting squares and blocking their path.
+Paintbots is a sophisticated C++ game engine that implements a territory control game where two AI-controlled robots compete to paint squares on a grid-based board. The project demonstrates advanced software engineering principles, utilizing multiple design patterns and robust architecture to create a flexible and maintainable system.
 
-## Game Mechanics
+## Core Architecture
 
-### Core Gameplay
-- 15x15 grid battlefield
-- Two robots (red and blue) compete simultaneously
-- Objective: Paint more squares than the opponent
-- 300 total moves per game
-- Multiple game elements add strategic depth:
-  - Rocks blocking movement
-  - Fog squares limiting visibility
-  - Paint blob shooting mechanism
-  - Limited paint blob shots
+### Design Patterns
 
-### Unique Features
-- Dynamic board generation
-- Configurable game parameters
-- Multiple robot strategies
-- Advanced movement and shooting mechanics
-- Realistic collision and interaction rules
+The project implements several key design patterns to ensure maintainability, flexibility, and robust error handling:
 
-## Key Components
+1. **Singleton Pattern**
+   - Implemented in:
+     - `Config`: Manages game configuration
+     - `GameBoard`: Controls game state
+     - `RobotAgentRoster`: Manages robot strategies
+   - Ensures single, consistent instances of critical components
+   - Thread-safe implementation with lazy initialization
+
+2. **Strategy Pattern**
+   - Core implementation through `IRobotAgent` interface
+   - Allows dynamic swapping of robot behaviors:
+     - `LazyRobot`: Minimalist movement strategy
+     - `RandomRobot`: Randomized decision making
+     - `AntiRandom`: Counter-random strategy
+   - Facilitates easy addition of new robot behaviors
+
+3. **Observer Pattern**
+   - Implemented via `Observable` and `Observer` base classes
+   - Used for real-time board state notifications
+   - Enables decoupled updates between components
+   - Primary observers:
+     - `PlainDisplay`: Console visualization
+     - Custom observers can be added
+
+4. **Factory Pattern**
+   - Used in robot creation and configuration
+   - Centralizes object creation logic
+   - Supports runtime strategy selection
+
+### Component Hierarchy
+
+```
+GameBoard
+├── BoardSquare (Abstract)
+│   ├── InternalBoardSquare
+│   └── ExternalBoardSquare
+├── Robot
+│   └── IRobotAgent (Interface)
+│       ├── LazyRobot
+│       ├── RandomRobot
+│       └── AntiRandom
+└── Config
+```
+
+## Key Features
 
 ### Board Management
-- Intelligent square tracking
-- Separate internal and external board representations
-- Support for different square types:
-  - Empty
-  - Rock
-  - Fog
-  - Wall
+- 15x15 grid battlefield
+- Multiple square types:
+  - Empty squares
+  - Rocks (movement obstacles)
+  - Fog (visibility limitation)
+  - Walls (board boundaries)
+- Dynamic board generation
+- Collision detection system
 
-### Robot Strategies
-Built-in robot strategies:
-1. **LazyRobot**: Minimalist movement, random shooting
-2. **RandomRobot**: Unpredictable movement patterns
-3. **BeatRandom**: Advanced strategy designed to outperform random movement
+### Robot Control System
+- Comprehensive robot API through `IRobotAgent`
+- Multiple vision modes:
+  - Short-range scan (5x5 grid)
+  - Long-range scan (full board)
+- Paint blob shooting mechanics
+- Configurable AI strategies
 
-### Configuration
-- Fully configurable game parameters
-- Support for custom configuration files
-- Default and custom rock/fog placements
-- Configurable paint blob mechanics
+### Configuration System
+- External configuration file support
+- Runtime parameter adjustment
+- Configurable elements:
+  - Hit duration
+  - Paint blob limits
+  - Rock/fog distribution
+  - Scan ranges
 
-## Prerequisites
+## Building and Running
 
-### System Requirements
-- C++ Compiler with C++11 support
+### Prerequisites
+- C++11 compatible compiler
+- Make build system
+- Standard library support
 
-## Installation and Setup
-
-### Cloning the Repository
+### Build Commands
 ```bash
-git clone https://github.com/your-username/paintbots.git
-cd paintbots
-```
-
-### Compilation
-
-#### Build All Components
-```bash
+# Build all components
 make all
-```
 
-#### Build Specific Targets
-```bash
-# Build test executables
-make test
+# Build specific components
+make paintbots    # Main game
+make ConfigTest   # Configuration tests
+make BoardTest    # Board component tests
 
-# Build main game executable
-make paintbots
-
-# Build specific test suites
-make ConfigTest
-make BoardSquareTest
-make GameBoardTest
-```
-
-#### Clean Build
-```bash
+# Clean build files
 make clean
 ```
 
-## Running the Game
-
-### Game Execution
+### Running the Game
 ```bash
-# Basic syntax
-./paintbots <board_config_file> <robot_config_file>
-
-# Example
-./paintbots board.config robots.config
+./paintbots <board_config> <robot_config>
 ```
 
-### Configuration Files
+#### Configuration Files
 
-#### Board Configuration (`board.config`)
+board.config:
 ```
-# Sample board.config
 HIT_DURATION = 25
 PAINTBLOB_LIMIT = 20
 ROCK_LOWER_BOUND = 5
@@ -111,35 +122,78 @@ FOG_UPPER_BOUND = 8
 LONG_RANGE_LIMIT = 5
 ```
 
-#### Robot Configuration (`robots.config`)
+robots.config:
 ```
-# First line: Red robot strategy
-# Second line: Blue robot strategy
-BeatRandom
-RandomRobot
+RandomRobot  # Red robot strategy
+LazyRobot    # Blue robot strategy
 ```
 
-## Running Tests
+## Testing Framework
 
 ### Unit Tests
+- Comprehensive test suites for all components
+- Test classes inherit from `ITest` interface
+- Coverage includes:
+  - Configuration validation
+  - Board state management
+  - Robot movement mechanics
+  - Observer pattern functionality
+
+### Test Execution
 ```bash
 # Run all tests
 make test
 
-# Run specific test suites
+# Run specific test suite
 ./ConfigTest
 ./BoardSquareTest
 ./GameBoardTest
 ```
 
-## Troubleshooting
+## Error Handling
 
-### Common Issues
-- Compilation Errors: Ensure C++11 compiler
-- Runtime Errors: Check configuration files
-- Test Failures: Verify system requirements
+### Robust Exception System
+- Custom exception hierarchy
+- Specific exception types:
+  - `ConfigError`
+  - `ConfigFileError`
+  - `ConfigBoundsError`
+  - `ConfigValueError`
 
-## Contact
-- Project Maintainer: Shobhit Sarkar
-- Email: [shobhit@iastate.edu]
-- Course: COM S 327, Iowa State University
+### Validation Systems
+- Configuration validation
+- Move validation
+- Board state validation
+- Robot collision detection
+
+## Memory Management
+
+### RAII Principles
+- Smart pointer usage
+- Automatic resource cleanup
+- Exception-safe design
+
+### Resource Management
+- Proper cleanup in destructors
+- Memory leak prevention
+- Efficient board state updates
+
+## Contributing
+
+### Adding New Robot Strategies
+1. Inherit from `IRobotAgent`
+2. Implement required methods:
+   - `getRobotName()`
+   - `getRobotCreator()`
+   - `getMove()`
+   - `setRobotColor()`
+3. Register strategy in `RobotAgentRoster`
+
+### Code Style
+- Follow existing naming conventions
+- Use consistent indentation
+- Document public interfaces
+- Include unit tests
+
+## Authors and Acknowledgment
+- Project Author: Shobhit Sarkar
